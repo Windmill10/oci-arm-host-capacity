@@ -11,20 +11,28 @@ jobs:
     name: Try LaunchInstance (A1.Flex Osaka)
     steps:
       - uses: actions/checkout@v4
-      - name: Install PHP
-        uses: shivammathur/setup-php@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          php-version: '8.3'
-      - name: Install dependencies
-        run: composer update --prefer-dist --no-progress
+          python-version: '3.12'
+
+      - name: Install oci SDK
+        run: pip install oci
+
+      - name: Write private key to file
+        run: |
+          curl -fsSL "${{ secrets.OCI_PRIVATE_KEY_FILENAME }}" -o /tmp/oci-api-key.pem
+          chmod 400 /tmp/oci-api-key.pem
+
       - name: Attempt provisioning
-        run: vendor/bin/phpunit --color tests/
+        run: python provision.py
         env:
           OCI_REGION: ${{ secrets.OCI_REGION }}
           OCI_USER_ID: ${{ secrets.OCI_USER_ID }}
           OCI_TENANCY_ID: ${{ secrets.OCI_TENANCY_ID }}
           OCI_KEY_FINGERPRINT: ${{ secrets.OCI_KEY_FINGERPRINT }}
-          OCI_PRIVATE_KEY_FILENAME: ${{ secrets.OCI_PRIVATE_KEY_FILENAME }}
+          OCI_PRIVATE_KEY_FILENAME: /tmp/oci-api-key.pem
           OCI_AVAILABILITY_DOMAIN: ${{ secrets.OCI_AVAILABILITY_DOMAIN }}
           OCI_SUBNET_ID: ${{ secrets.OCI_SUBNET_ID }}
           OCI_IMAGE_ID: ${{ secrets.OCI_IMAGE_ID }}
