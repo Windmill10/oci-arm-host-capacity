@@ -55,6 +55,6 @@ try:
 except oci.exceptions.ServiceError as e:
     if e.status == 500 and "Out of host capacity" in e.message:
         print(f"Out of capacity in {AD} — will retry next run.")
-        sys.exit(1)
+        sys.exit(0)
     print(f"Unexpected error HTTP {e.status} {e.code}: {e.message}")
     sys.exit(2)
