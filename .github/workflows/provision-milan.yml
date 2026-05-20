@@ -1,8 +1,6 @@
 name: Provision A1.Flex (Milan)
 
 on:
-  schedule:
-    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
