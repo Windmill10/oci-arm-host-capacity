@@ -1,0 +1,43 @@
+name: Provision A1.Flex (Milan)
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    name: Try LaunchInstance (A1.Flex Milan)
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install oci SDK
+        run: pip install oci
+
+      - name: Write private key to file
+        run: |
+          echo "${{ secrets.MILAN_OCI_PRIVATE_KEY_B64 }}" | base64 -d > /tmp/oci-api-key-milan.pem
+          chmod 400 /tmp/oci-api-key-milan.pem
+
+      - name: Attempt provisioning
+        run: python provision.py
+        env:
+          OCI_REGION: ${{ secrets.MILAN_OCI_REGION }}
+          OCI_USER_ID: ${{ secrets.MILAN_OCI_USER_ID }}
+          OCI_TENANCY_ID: ${{ secrets.MILAN_OCI_TENANCY_ID }}
+          OCI_KEY_FINGERPRINT: ${{ secrets.MILAN_OCI_KEY_FINGERPRINT }}
+          OCI_PRIVATE_KEY_FILENAME: /tmp/oci-api-key-milan.pem
+          OCI_AVAILABILITY_DOMAIN: ${{ secrets.MILAN_OCI_AVAILABILITY_DOMAIN }}
+          OCI_SUBNET_ID: ${{ secrets.MILAN_OCI_SUBNET_ID }}
+          OCI_IMAGE_ID: ${{ secrets.MILAN_OCI_IMAGE_ID }}
+          OCI_OCPUS: ${{ secrets.MILAN_OCI_OCPUS }}
+          OCI_MEMORY_IN_GBS: ${{ secrets.MILAN_OCI_MEMORY_IN_GBS }}
+          OCI_SHAPE: ${{ secrets.MILAN_OCI_SHAPE }}
+          OCI_MAX_INSTANCES: ${{ secrets.MILAN_OCI_MAX_INSTANCES }}
+          OCI_SSH_PUBLIC_KEY: ${{ secrets.MILAN_OCI_SSH_PUBLIC_KEY }}
